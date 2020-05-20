@@ -120,7 +120,7 @@
         <div class="form-group row">
               <label for="ticketnumber" class="col-sm-6">Ticket MS-<span class="star" style="color:red">*</span></label>
               <div class="col-sm-6">
-                 <input type="text" class="form-control ticketnumber" name="ticketnumber" id="ticketnumber" pattern="([0-9]+)" title="Only numbers are accepeted" placeholder="Ticket Number"required>
+                 <input type="text" class="form-control ticketnumber" name="ticketnumber" id="ticketnumber" onblur="checkticket()" pattern="([0-9]+)" title="Only numbers are accepeted" placeholder="Ticket Number"required>
               </div>
             </div>
           <div class="form-group row">
@@ -136,11 +136,11 @@
               <div class="col-sm-6">
                 <select class="form-control status" id="status" name="status">
                   <option></option>
-                  <option value="Good">Good</option>
-                  <option value="Very_Good">Very Good</option>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Not_Good">Not Good</option>
-                  <option value="Bad">Bad</option>
+                  <option value="GOOD">Good</option>
+                  <option value="VERY_GOOD">Very Good</option>
+                  <option value="EXCELLENT">Excellent</option>
+                  <option value="NOT_GOOD">Not Good</option>
+                  <option value="BAD">Bad</option>
                 </select>
               </div>
            </div>
@@ -150,16 +150,16 @@
               <div class="col-sm-6">
                 <select class="form-control status" id="reason" name="reason">
                   <option></option>
-                  <option value="Repeated Same code error">Repeated Same code error</option>
-                  <option value="Code standard Not good">Code standard Not good</option>
-                  <option value="Inconsistency of the flow">Inconsistency of the flow</option>
-                  <option value="Syntax Errors in code">Syntax Errors in code</option>
-                  <option value="Communication is not good">Communication is not good</option>
-                  <option value=" Didn't understand Logic">Didn't understand Logic</option>
-                  <option value="Production got affected">Production got affected</option>
-                  <option value="Taken long time to complete">Taken long time to complete</option>
-                  <option value="More sent backs from testing">More sent backs from testing</option>
-                  <option value="quality is not good">quality is not good</option>
+                  <option value="REPEATED SAME CODE ERROR">Repeated Same code error</option>
+                  <option value="CODE STANDARD NOT GOOD">Code standard Not good</option>
+                  <option value="INCONSISTENCY OF THE FLOW">Inconsistency of the flow</option>
+                  <option value="SYNTAX ERRORS IN CODE">Syntax Errors in code</option>
+                  <option value="COMMUNICATION IS NOT GOOD">Communication is not good</option>
+                  <option value="DID NOT UNDERSTAND LOGIC">Didn't understand Logic</option>
+                  <option value="PRODUCTION GOT AFFECTED">Production got affected</option>
+                  <option value="TAKEN LONG TIME TO COMPLETE">Taken long time to complete</option>
+                  <option value="MORE SENT BACKS FROM TESTING">More sent backs from testing</option>
+                  <option value="QUALITY IS NOT GOOD">quality is not good</option>
                   
                 </select>
               </div>
@@ -186,6 +186,35 @@
     </div>
     <script type="text/javascript">
       var userRating ="";
+
+      function checkticket()
+      {
+              var ticketnumber= $("#ticketnumber").val();
+              var prefix      = $("select[name='prefix']").val();
+              console.log(ticketnumber);
+              console.log(prefix);
+              $.ajax({
+                     type: "POST",
+                     url: "checkticket.php",
+                     dataType: "json",
+                     data: {
+                         ticketnumber: ticketnumber,
+                         prefix      : prefix                       
+                     },
+                     cache: false,
+                     success: function(response) {
+                      console.log("This is inside checkticket success");
+                      if(response.code=="400")
+                      {
+                        console.log("This is inside checkticket code 400");
+                        $('#error_msg').html(response.message);
+                        $('#error_div').show("fast");
+                        $('#error_div').delay(5000).hide(0);
+                      }
+                     }
+                 });
+      }
+
       $(document).ready(function(){
 
          
@@ -208,8 +237,6 @@
     });
 
     });
-
-
 
       $('#feedbackform').bootstrapValidator({
         feedbackIcons: {
@@ -255,13 +282,6 @@
                         message: 'Reason is required.'
                     }
                 }
-            },
-            'comments': {
-                validators: {
-                    notEmpty: {
-                        message: 'Comments is required.'
-                    }
-                }
             }
         }
     }).on('success.form.bv', function(e) {
@@ -269,19 +289,17 @@
         e.preventDefault();
 
         var prefix = $("select[name='prefix']").val();
-        
         var ticketnumber = $("input[name='ticketnumber']").val();
-        
         var rating = userRating;
-        
         var status = $("select[name='status']").val();
-        
         var reason = $("select[name='reason']").val();
-        
         var comments = $("textarea[name='comments']").val();
-                //console.log(prefix,rating,status,reason,comments);
+        console.log(rating);
+        console.log(prefix);
+        console.log(ticketnumber);
+        console.log(status);
+        console.log(reason);
                  $.ajax({
-         
                      type: "POST",
                      url: "feedbackdb.php",
                      dataType: "json",
@@ -291,11 +309,11 @@
                          rating: rating,
                          status: status,
                          reason: reason,
-                         comments: comments
-                         
+                         comments: comments 
                      },
                      cache: false,
                      success: function(response) {
+                      console.log("This is inside success of submit");
                       console.log(response);
                       
                      }
