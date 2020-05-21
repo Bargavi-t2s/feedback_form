@@ -30,7 +30,9 @@ class ManageFeedback
         $key = array_keys($form_fields);
         $val = array_values($form_fields);
         $sql = "INSERT INTO manage_feedback (" . implode(', ', $key) . ") "
-             . "VALUES ('" . implode("', '", $val) . "')";
+             . "VALUES ('" . implode("', '", $val) . "')";  
+        echo $sql;
+
         $result = mysqli_query($this->conn,$sql);
         if($result){
             return mysqli_insert_id($this->conn);

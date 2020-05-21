@@ -89,6 +89,16 @@
   color: red;
   }
 
+   #error_div
+  {
+   display:none;
+  }
+
+  #success_div
+  {
+   display:none;
+  }
+
     </style>
   </head>
   <body>
@@ -120,7 +130,7 @@
         <div class="form-group row">
               <label for="ticketnumber" class="col-sm-6">Ticket MS-<span class="star" style="color:red">*</span></label>
               <div class="col-sm-6">
-                 <input type="text" class="form-control ticketnumber" name="ticketnumber" id="ticketnumber" onblur="checkticket()" pattern="([0-9]+)" title="Only numbers are accepeted" placeholder="Ticket Number"required>
+                 <input type="text" class="form-control ticketnumber" name="ticketnumber" id="ticketnumber" pattern="([0-9]+)" title="Only numbers are accepeted" placeholder="Ticket Number"required>
               </div>
             </div>
           <div class="form-group row">
@@ -176,7 +186,6 @@
            <div class="buttons col-sm-6">
                 <button type="submit" name= "submit" id="submit" class="btn btn-success mr-2">Submit</button>
                 <button type="button" name="reset" id="reset" class="btn btn-danger mr-2">Clear</button>
-                <!-- <button type="button" name="add_more" id="add_more" class="btn btn-warning">Add More</button> -->
                </div>
              </div>
 
@@ -186,34 +195,6 @@
     </div>
     <script type="text/javascript">
       var userRating ="";
-
-      function checkticket()
-      {
-              var ticketnumber= $("#ticketnumber").val();
-              var prefix      = $("select[name='prefix']").val();
-              console.log(ticketnumber);
-              console.log(prefix);
-              $.ajax({
-                     type: "POST",
-                     url: "checkticket.php",
-                     dataType: "json",
-                     data: {
-                         ticketnumber: ticketnumber,
-                         prefix      : prefix                       
-                     },
-                     cache: false,
-                     success: function(response) {
-                      console.log("This is inside checkticket success");
-                      if(response.code=="400")
-                      {
-                        console.log("This is inside checkticket code 400");
-                        $('#error_msg').html(response.message);
-                        $('#error_div').show("fast");
-                        $('#error_div').delay(5000).hide(0);
-                      }
-                     }
-                 });
-      }
 
       $(document).ready(function(){
 
@@ -231,7 +212,10 @@
         userRating = this.value;
         //alert(userRating);
     }); 
-    $('#reset').click(function(){
+    $('#reset').click(function(e){
+
+      e.preventDefault();
+
       console.log("inside reset function");
       $('#feedbackform').trigger("reset");
     });
@@ -294,28 +278,34 @@
         var status = $("select[name='status']").val();
         var reason = $("select[name='reason']").val();
         var comments = $("textarea[name='comments']").val();
-        console.log(rating);
-        console.log(prefix);
-        console.log(ticketnumber);
-        console.log(status);
-        console.log(reason);
                  $.ajax({
                      type: "POST",
                      url: "feedbackdb.php",
                      dataType: "json",
                      data: {
-                         prefix: prefix,
+                         prefix      : prefix,
                          ticketnumber: ticketnumber,
-                         rating: rating,
-                         status: status,
-                         reason: reason,
-                         comments: comments 
+                         rating      : rating,
+                         status      : status,
+                         reason      : reason,
+                         comments    : comments 
                      },
                      cache: false,
                      success: function(response) {
-                      console.log("This is inside success of submit");
                       console.log(response);
-                      
+                      console.log(response.message);
+                      if(response.code=="200")
+                      {
+                        $("#success_msg").html(response.message);
+                        $('#success_div').show("fast");
+                        $('#success_div').delay(5000).hide(0);
+                      }
+                      else if(response.code=="400")
+                      {
+                        $("#error_msg").html(response.message);
+                        $('#error_div').show("fast");
+                        $('#error_div').delay(5000).hide(0);
+                      }
                      }
                  });
              });

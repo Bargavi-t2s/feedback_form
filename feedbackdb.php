@@ -5,7 +5,7 @@ include('managefeedback.php');
 $ManageFeedback= new ManageFeedback();
 
 session_start();
-$prefix = $ticketnumber = $rating = $status = $reason = $comments = array();
+ob_start();
 
     $prefix             = ($_POST['prefix']);
     $ticketnumber       = ($_POST['ticketnumber']);
@@ -14,71 +14,78 @@ $prefix = $ticketnumber = $rating = $status = $reason = $comments = array();
     $reason             = ($_POST['reason']);
     $comments           = ($_POST['comments']);
  
-$length = sizeof($ticketnumber); 
-
 if ($db) 
 {
-    $success=0;
-    
- for ($i=0; $i < $length ; $i++) 
- {   
-    // $form_fields= array(
-    //                         'ticket_number' => $ticketnumber,
-    //                         'prefix' => $prefix,
-    //                         'star_rating' => $rating,
-    //                         'status' => $status,
-    //                         'reason' => $reason,
-    //                         'comments' => $comments);
+     $answer = $ManageFeedback->checkTicket($ticketnumber,$prefix);
+     if($answer)
+     {
+            $success=0;
                 $form_fields= array(
-                            'ticket_number' => $ticketnumber[$i],
-                            'prefix' => $prefix[$i],
-                            'star_rating' => $rating[$i],
-                            'status' => $status[$i],
-                            'reason' => $reason[$i],
-                            'comments' => $comments[$i]);
+                            'prefix' => $prefix,
+                            'ticket_number' => $ticketnumber,
+                            'star_rating' => $rating,
+                            'status' => $status,
+                            'reason' => $reason,
+                            'comments' => $comments);
                 if($ManageFeedback->insert($form_fields))
                 {
                     $success = 1;
-                }
-
-    }
+                } 
+                ob_end_clean(); 
 if($success === 1){
     echo json_encode([
        'code' => 200,
-    'message'=> 'You have successfully submitted your end of the day report'
+    'message'=> 'You have successfully submitted your feedback'
          ]);
 }
-}
-else 
-{
+else{
     echo json_encode([
-       'code' => 404,
-    'message'=> 'Database connection failure'
-]);
-    
+       'code' => 400,
+    'message'=> 'Data Insertion Failed !'
+         ]);
 }
-//     $prefix             = ($_POST['prefix']);
-//     $ticketnumber       = ($_POST['ticketnumber']);
-//     $rating             = ($_POST['rating']);
-//     $status             = ($_POST['status']);
-//     $reason             = ($_POST['reason']);
-//     $comments           = ($_POST['comments']);
-//     if($db){
-//         $form_fields= array(
-//                             'ticket_number' => $ticketnumber,
+     }
+     else
+     {
+        echo json_encode([
+       'code' => 400,
+    'message'=> 'Specified Ticket does not exist !'
+         ]);
+     }
+//     $success=0;
+//                 $form_fields= array(
 //                             'prefix' => $prefix,
+//                             'ticket_number' => $ticketnumber,
 //                             'star_rating' => $rating,
 //                             'status' => $status,
 //                             'reason' => $reason,
 //                             'comments' => $comments);
-//     if($ManageFeedback->insert($form_fields))
-//     {   
-//         echo json_encode(['code'=>200,'message'=>'data inserted.']);  
-//     }
+//                 if($ManageFeedback->insert($form_fields))
+//                 {
+//                     $success = 1;
+//                 } 
+//                 ob_end_clean(); 
+// if($success === 1){
+//     echo json_encode([
+//        'code' => 200,
+//     'message'=> 'You have successfully submitted your feedback'
+//          ]);
 // }
 // else{
-//     echo "disconnected";
+//     echo json_encode([
+//        'code' => 400,
+//     'message'=> 'Data Insertion Failed !'
+//          ]);
 // }
+}
+else 
+{
+    echo json_encode([
+       'code' => 400,
+    'message'=> 'Database connection failure'
+]); 
+}
+
 ?>
 
 
